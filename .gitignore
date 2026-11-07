@@ -1,0 +1,15 @@
+# OS & Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Build & runtime artifacts
+bin/
+obj/
+dist/
+node_modules/
+*.log
