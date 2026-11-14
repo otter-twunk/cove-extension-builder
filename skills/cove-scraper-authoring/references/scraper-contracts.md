@@ -1,4 +1,4 @@
-# Cove Compiled C# Scraper Contracts & DTOs (`v1.7.0`)
+# Cove Compiled C# Scraper Contracts & DTOs (`v1.7.0`+)
 
 ## 1. `IScraperProvider` & Descriptors (`Cove.Plugins`)
 
@@ -105,21 +105,23 @@ public interface IScraperProvider : IExtension
 }
 ```
 
-> **Important Contract Note**:
-> - `Scrape*Async` and `Search*Async` take `(ScraperRequest<T>, CancellationToken)` — there is **no** `IScraperHost` parameter.
-> - There is no `ScraperEntity.Studio`; studio attribution is returned via `StudioName` on `ScrapedVideoDto`, `ScrapedGalleryDto`, `ScrapedImageDto`, `ScrapedGroupDto`, `ScrapedAudioDto`, and `ScrapedTextDto`.
+> [!NOTE]
+> - `Scrape*Async` and `Search*Async` take `(ScraperRequest<T>, CancellationToken)`.
+> - Studio attribution is returned via `StudioName` on output DTOs.
+> - `Permissions.AllowNetworkHosts` specifies the allowed destination hosts for outbound requests.
 
 ---
 
 ## 2. Input & Output DTOs (`Cove.Core.DTOs`)
 
 ### Inputs
-- **`VideoScrapeInput`**: `Guid? LocalVideoId`, `string? Url`, `List<string> Urls`, `string? Title`, `string? Code`, `string? Date`, `string? Details`, `string? Director`, `List<VideoScrapeFile> Files` (`Path`, `Format`, `Width`, `Height`, `DurationSeconds`, `VideoCodec`, `AudioCodec`, `FrameRate`, `BitRate`, `SizeBytes`, `List<VideoScrapeFingerprint> Fingerprints`).
-- **`PerformerScrapeInput`**: `Guid? LocalPerformerId`, `string? Url`, `List<string> Urls`, `string? Name`, `string? Disambiguation`, `string? Gender`, `string? Birthdate`, `string? Country`, `string? Ethnicity`, `string? EyeColor`, `string? HairColor`, `int? HeightCm`, `int? Weight`, `string? Measurements`, `string? Details`, `List<string> Aliases`.
-- **`GalleryScrapeInput`**: `Guid? LocalGalleryId`, `string? Url`, `List<string> Urls`, `string? Title`, `string? Code`, `string? Date`, `string? Details`, `string? Photographer`.
-- **`ImageScrapeInput`**: `Guid? LocalImageId`, `string? Url`, `List<string> Urls`, `string? Title`, `string? Date`, `string? Details`, `string? Photographer`.
-- **`GroupScrapeInput`**: `Guid? LocalGroupId`, `string? Url`, `List<string> Urls`, `string? Name`, `string? Aliases`, `int? Duration`, `string? Date`, `string? Director`, `string? Details`, `string? Synopsis`.
-- **`AudioScrapeInput` / `TextScrapeInput`**: `Guid? LocalAudioId`/`LocalTextId`, `string? Url`, `List<string> Urls`, `string? Title`, `string? Code`, `string? Date`, `string? Details`.
+- **`VideoScrapeInput`**: `int? LocalVideoId`, `string? Url`, `List<string> Urls`, `string? Title`, `string? Code`, `string? Date`, `string? Details`, `string? Director`, `List<VideoScrapeFile> Files`.
+- **`PerformerScrapeInput`**: `int? LocalPerformerId`, `string? Url`, `List<string> Urls`, `string? Name`, `string? Disambiguation`, `string? Gender`, `string? Birthdate`, `string? Country`, `string? Ethnicity`, `string? EyeColor`, `string? HairColor`, `int? HeightCm`, `int? Weight`, `string? Measurements`, `string? Details`, `List<string> Aliases`.
+- **`GalleryScrapeInput`**: `int? LocalGalleryId`, `string? Url`, `List<string> Urls`, `string? Title`, `string? Code`, `string? Date`, `string? Details`, `string? Photographer`.
+- **`ImageScrapeInput`**: `int? LocalImageId`, `string? Url`, `List<string> Urls`, `string? Title`, `string? Date`, `string? Details`, `string? Photographer`.
+- **`GroupScrapeInput`**: `int? LocalGroupId`, `string? Url`, `List<string> Urls`, `string? Name`, `string? Aliases`, `int? Duration`, `string? Date`, `string? Director`, `string? Details`, `string? Synopsis`.
+- **`AudioScrapeInput`**: `int? LocalAudioId`, `string? Url`, `List<string> Urls`, `string? Title`, `string? Code`, `string? Date`, `string? Details`.
+- **`TextScrapeInput`**: `int? LocalTextId`, `string? Url`, `List<string> Urls`, `string? Title`, `string? Code`, `string? Date`, `string? Details`.
 
 ### Outputs
 - **`ScrapedVideoDto`**:
@@ -137,7 +139,7 @@ public interface IScraperProvider : IExtension
 - **`ScrapedPerformerDto`**:
   - `string? SourceScraperId`, `string? Name`, `string? Disambiguation`, `string? Gender`, `string? Birthdate` (`yyyy-MM-dd`), `string? Country`, `string? Ethnicity`, `string? EyeColor`, `string? HairColor`, `int? HeightCm`, `int? Weight`, `string? Measurements`, `string? Tattoos`, `string? Piercings`, `string? Details`, `string? ImageUrl`, `List<string> Urls`, `List<string> Aliases`, `List<string> TagNames`
 - **`ScrapedGalleryDto`**:
-  - `string? Title`, `string? Code`, `string? Date`, `string? Details`, `string? Photographer`, `string? ImageUrl`, `List<string> Urls`, `string? StudioName`, `List<string> PerformerNames`, `List<string> TagNames` *(no `SourceScraperId` property on `ScrapedGalleryDto`)*
+  - `string? Title`, `string? Code`, `string? Date`, `string? Details`, `string? Photographer`, `string? ImageUrl`, `List<string> Urls`, `string? StudioName`, `List<string> PerformerNames`, `List<string> TagNames`
 - **`ScrapedImageDto`**:
   - `string? SourceScraperId`, `string? Title`, `string? Date`, `string? Details`, `string? Photographer`, `string? ImageUrl`, `List<string> Urls`, `string? StudioName`, `List<string> PerformerNames`, `List<string> TagNames`, `string? GalleryTitle`
 - **`ScrapedGroupDto`**:

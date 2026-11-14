@@ -70,8 +70,9 @@ node scripts/new-extension.mjs \
 #### For Compiled C# Scrapers (`IScraperProvider`):
 - Inherit from `CoveExtensionBase, IScraperProvider`. Do **not** override metadata properties (`Id`, `Name`, `Version`, etc.) — `CoveExtensionBase` populates them from `extension.json`.
 - Capture `IServiceProvider` in `InitializeAsync(IServiceProvider services, CancellationToken ct = default)` and obtain `HttpClient` via `_services?.GetService<IHttpClientFactory>()?.CreateClient(Id)`.
-- Use `ScraperUtilities.ExtractStructuredMetadata(html, DefaultStudioName)` to automatically parse JSON-LD + OpenGraph + meta tags, then layer site-specific regex/DOM selectors for any remaining fields (`PerformerNames`, `TagNames`, `Code`, `Date`, `StudioName`, `Director`).
+- Use `ScraperUtilities.ExtractStructuredMetadata(html, DefaultStudioName)` to automatically parse JSON-LD + OpenGraph + meta tags, then layer site-specific regex/DOM selectors for any remaining fields (`PerformerNames`, `TagNames`, `Code`, `Date`, `ProductionDate`, `StudioName`, `Director`).
 - Always normalize dates to ISO `yyyy-MM-dd` via `ScraperUtilities.NormalizeIsoDate(...)`.
+- Honor request destination rules via `request.Permissions.AllowNetworkHosts`.
 - Always provide a `StudioName` fallback so scraped scenes are attributable in Cove.
 - Keep `ParseVideoHtml` / `ParseSearchResultsHtml` `internal static` so xUnit tests can also test parsing directly alongside full `ScrapeVideoAsync` / `SearchVideosAsync` calls.
 

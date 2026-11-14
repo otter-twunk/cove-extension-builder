@@ -1,4 +1,4 @@
-# Cove Downloader SDK Contracts & Reference Patterns (`v1.7.0`)
+# Cove Downloader SDK Contracts & Reference Patterns (`v1.7.0`+)
 
 ## 1. Exact C# Downloader Contracts (`Cove.Plugins`)
 
@@ -59,8 +59,28 @@ public sealed record DownloaderRequest(
     string? QualityId = null,
     string? SourceUrl = null)
 {
+    /// <summary>
+    /// Highest frame height to download, from the server's download settings. Set only when
+    /// QualityId does not already name a specific resolution.
+    /// </summary>
     public int? MaxHeight { get; init; }
 }
+
+public sealed record DownloaderImportRequest(
+    string DownloaderId,
+    string Url,
+    DownloaderEntity Entity,
+    int? EntityId = null,
+    string? QualityId = null,
+    string? SourceUrl = null)
+{
+    /// <summary>
+    /// Download even when EntityId already has files or the URL is already in the library.
+    /// </summary>
+    public bool AllowDuplicateDownload { get; init; }
+}
+
+public sealed record DownloaderImportResult(string LibraryPath, int? EntityId);
 
 public sealed record DownloaderResult(
     string LocalPath,
@@ -97,56 +117,71 @@ public interface IDownloaderProvider : IExtension
         CancellationToken ct)
         => Task.FromResult<DownloaderResult?>(null);
 }
-```
 
-### Host Site Login Provider (`Cove.Plugins` `v1.7.0`)
-```csharp
-public sealed record DownloaderSiteLogin(
-    string Site,
-    string Username,
-    string Password)
+/// <summary>Site credentials saved in Cove's Downloader Settings.</summary>
+public sealed record DownloaderSiteLogin(string Site, string Username, string Password)
 {
     public DateTime? SavedAt { get; init; }
 }
 
+/// <summary>Resolves site logins configured in Cove Settings.</summary>
 public interface IDownloaderSiteLoginProvider
 {
     DownloaderSiteLogin? FindForUrl(string url);
 }
+
+/// <summary>Performs post-download file maintenance (primary file reassignment, duplicate removal).</summary>
+public interface IVideoFileMaintenanceService
+{
+    Task<VideoFileOperationResult> MakePrimaryWhenSameContentAsync(int videoId, int fileId, CancellationToken ct);
+    Task<VideoFileOperationResult> DeleteFileAsync(int fileId, bool deleteFromDisk, CancellationToken ct);
+}
+
+public sealed record VideoFileOperationResult(bool Applied, string? Reason);
 ```
-Resolve from `IServiceProvider` in `InitializeAsync`:
+
+---
+
+## 2. Downloader Implementation Archetypes
+
+### Archetype A: Direct HTTP Media Stream
+Stream response content directly to `Path.Combine(host.TempDirectory, filename)` with progress reporting:
+
 ```csharp
-var loginProvider = _services?.GetService<IDownloaderSiteLoginProvider>();
-var credentials = loginProvider?.FindForUrl(request.Url);
+using var response = await client.GetAsync(mediaStreamUrl, HttpCompletionOption.ResponseHeadersRead, ct);
+response.EnsureSuccessStatusCode();
+
+var totalBytes = response.Content.Headers.ContentLength;
+using var contentStream = await response.Content.ReadAsStreamAsync(ct);
+using var fileStream = File.Create(tempFile);
+
+var buffer = new byte[81920];
+long totalRead = 0;
+int read;
+
+while ((read = await contentStream.ReadAsync(buffer, ct)) > 0)
+{
+    await fileStream.WriteAsync(buffer.AsMemory(0, read), ct);
+    totalRead += read;
+    if (totalBytes.HasValue && totalBytes.Value > 0)
+    {
+        double pct = (double)totalRead / totalBytes.Value * 100.0;
+        host.ReportProgress(pct, $"{totalRead / 1048576} MB / {totalBytes.Value / 1048576} MB");
+    }
+}
 ```
 
----
+### Archetype B: External Binary Delegation (`Divert = true`)
+For services where an external tool (e.g. `yt-dlp` or `ffmpeg`) handles token generation or segmented streams, return `Divert = true` in `DownloaderUrlMatch`. Cove delegates execution to the external runtime while maintaining progress hooks.
 
-## 2. How Cove's `DownloaderService` Invokes Your Extension
-
-1. **URL Matching & Diversion (`MatchAllAsync` / `MatchAsync`)**:
-   - Cove calls `MatchAllAsync(url, ct)` across registered `IDownloaderProvider`s.
-   - If a match has `Divert = true`, Cove does **not** call `DownloadAsync` on your provider; instead it recursively matches `match.NormalizedUrl` against all other providers (up to depth 4) while carrying `match.SourceUrl ?? originalUrl` forward so the imported item retains the original wrapper URL.
-   - If `Divert = false`, Cove verifies `DownloaderDescriptor.SupportedUrlPatterns` (`*` wildcard or substring matching).
-2. **Downloading (`DownloadAsync`)**:
-   - Cove creates a unique per-job `host.TempDirectory`.
-   - `host.ReportProgress(progress, message)` clamps `progress` between `0` and `100`.
-   - `result.LocalPath` can be either a filename relative to `host.TempDirectory` or an absolute path inside `host.TempDirectory`.
-   - If `InlineVideoMetadata`, `InlineGalleryMetadata`, or `InlineImageMetadata` is provided on `DownloaderResult`, Cove applies the metadata immediately upon importing the downloaded file.
-
----
-
-## 3. Reference Patterns from `yourcove/communitydownloaders`
-
-### Pattern A: Multi-Entity Provider + External Link Diversion (`RedditDownloader` pattern)
-A single `IDownloaderProvider` can expose multiple `DownloaderDescriptor`s (e.g., `.video`, `.image`, `.gallery`):
-- In `MatchAllAsync(url, ct)`, inspect the target post/page JSON or HTML:
-  - If it embeds an external video link (e.g. RedGifs, YouTube, Vimeo), return a `DownloaderUrlMatch` with `Divert: true`, `NormalizedUrl: externalUrl`, `SourceUrl: url`.
-  - If it is a multi-image gallery, return a `DownloaderUrlMatch` targeting the `.gallery` descriptor ID.
-  - If it is a single image, return a `DownloaderUrlMatch` targeting the `.image` descriptor ID.
-  - If it is a native video with multiple resolutions, populate `QualityOptions` with `new DownloaderQualityOption($"height:{h}", $"{h}p") { Width = w, Height = h }` and return a `DownloaderUrlMatch` targeting the `.video` descriptor ID.
-
-### Pattern B: Quality Selection & `MaxHeight` (`v1.7.0` pattern)
-When `request.QualityId` or `request.MaxHeight` is passed on `DownloaderRequest`:
-- If `request.QualityId` starts with `"height:"` (e.g. `"height:720"`), select the highest representation `<= 720`.
-- Otherwise, if `request.MaxHeight` is set, select the highest representation `<= request.MaxHeight` (falling back to the lowest available representation if all exceed `MaxHeight`).
+### Archetype C: Multi-Image Gallery ZIP
+For multi-image photo sets, download individual images into a temporary folder and package them into a `.zip` archive:
+```csharp
+var zipPath = Path.Combine(host.TempDirectory, $"{galleryCode}.zip");
+ZipFile.CreateFromDirectory(imagesDir, zipPath);
+return new DownloaderResult(
+    LocalPath: zipPath,
+    OriginalFilename: $"{galleryCode}.zip",
+    InlineGalleryMetadata: scrapedGallery
+);
+```

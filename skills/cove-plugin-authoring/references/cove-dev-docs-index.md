@@ -6,7 +6,7 @@ This index provides instant recall and fast lookup of official Cove developer do
 
 ## 1. Official Documentation Structure (`docs-site`)
 
-The official documentation site sources are located at `/Users/kari/cove-dev/upstream/docs-site/src/content/docs/docs/` (matching `https://yourcove.org/docs/`).
+The official documentation site sources are located at `/Users/kari/cove-dev/upstream/docs-site/src/content/docs/docs/` (matching `https://yourcove.org/docs/` and `https://yourcove.net/docs/`).
 
 ### Developer Core Guides
 
@@ -14,13 +14,18 @@ The official documentation site sources are located at `/Users/kari/cove-dev/ups
 |---|---|
 | `docs/developer/index.mdx` | **Developer Overview**: Architectural philosophy, local-first design, extensibility principles. |
 | `docs/developer/extensions/overview.mdx` | **Extension Architecture**: Host boundaries, capabilities (UI pages, panels, tabs, backend APIs, jobs, themes, storage). |
+| `docs/developer/extensions/extension-points.mdx` | **Extension Point Catalog**: Exhaustive catalog of backend capabilities (`IApiExtension`, `IMiddlewareExtension`, `IJobExtension`, `IBackgroundExtension`, `IEventExtension`, `IScanParticipant`, `IExtensionEntityFilterProvider`), service exchange, and SDK bases. |
+| `docs/developer/extensions/ui-extension-points.mdx` | **UI Extension Points**: Additive UI, personal dashboard widgets (`UIDashboardWidgetContribution`), login methods, named slots, entity media overrides (`entity.media`), settings tabs/panels, keyboard actions, and in-app feature guides. |
+| `docs/developer/extensions/frontend-runtime.mdx` | **Frontend Runtime API**: Virtual module map (`@cove/runtime/*`), WebXR immersive playback (`@cove/runtime/webxr`), `extensionFetch` client, and shared components barrel (`@cove/runtime/components`). |
+| `docs/developer/extensions/events.mdx` | **Extension Events**: Best-effort process-local event delivery, canonical `noun.verb` event naming (`video.created`, `audio.updated`, `rating.deleted`), and rating data payloads. |
+| `docs/developer/extensions/permissions.mdx` | **Permissions & Security**: Manifest declarations (`network`, `scraperRuntime`, `downloaderRuntime`), assignable role permissions (`IPermissionContributor`), and Minimal API endpoint authorization conventions (`RequireCovePermission`, `RequireCoveEntityAccess`). |
+| `docs/developer/extensions/packaging.mdx` | **Packaging Specifications**: Archive layout rules, manifest single source of truth in `extension.json`, semantic dependencies, `minCoveVersion` enforcement, and release validation. |
 | `docs/developer/extensions/create-extension.mdx` | **Create an Extension**: Defining user-facing behavior, splitting frontend vs backend, pre-built artifact packaging. |
-| `docs/developer/extensions/permissions.mdx` | **Permissions & Security**: Least-privilege model, admin review clarity, clear local failure handling. |
-| `docs/developer/extensions/packaging.mdx` | **Packaging Specifications**: Stable IDs, semantic versions, directory structure, single source of truth in `extension.json`. |
-| `docs/developer/api/overview.mdx` | **API Surface Principles**: Host integration boundaries, data ownership, provenance tracking, keeping long tasks out of request handlers. |
+| `docs/developer/extensions/create-downloader.mdx` | **Downloader Guide**: `IDownloaderProvider`, progress reporting, quality options (`Width`, `Height`), max resolution clamping (`MaxHeight`), temporary file handling. |
+| `docs/developer/extensions/create-scraper.mdx` | **Scraper Guide**: `IScraperProvider`, native YAML scrapers, URL and text querying, provenance attribution, `ScraperPermissions.AllowNetworkHosts`. |
+| `docs/developer/api/overview.mdx` | **API Surface Principles**: Unversioned `/api/` base routes, OpenAPI discovery at `/openapi/v1.json` (dev mode only), bearer API tokens with scoped permissions, pagination, and `skipCount`. |
 | `docs/developer/getting-started/local-development.mdx` | **Local Environment**: Running Cove backend (.NET 10) & frontend (Vite/React 19), dev environment configuration. |
-| `docs/developer/extensions/create-downloader.mdx` | **Downloader Guide**: `IDownloaderProvider`, progress reporting, quality options, temporary file handling. |
-| `docs/developer/extensions/create-scraper.mdx` | **Scraper Guide**: `IScraperProvider`, native YAML scrapers, URL and text-based querying, provenance attribution. |
+| `docs/developer/architecture/logging.mdx` | **Logging Architecture**: Structured logging, category names, log levels, and performance tracing. |
 
 ---
 
@@ -29,8 +34,12 @@ The official documentation site sources are located at `/Users/kari/cove-dev/ups
 Located at `/Users/kari/cove-dev/upstream/cove/docs/`:
 
 ### Key Specifications & Contracts
+- **Feature Guides Schema**: `/Users/kari/cove-dev/upstream/cove/docs/feature-guides/schema.json`
+  - JSON schema for writing in-app User Guide topics and articles packaged via `featureGuides: [...]` in `extension.json`.
 - **Entity Merging & Deduplication**: `/Users/kari/cove-dev/upstream/cove/docs/contributing/entity-merge-contract.md`
   - Explains how performers, tags, and scenes merge while preserving metadata provenance and custom field values.
+- **Video Cutting & Shot Boundaries**: `/Users/kari/cove-dev/upstream/cove/docs/video-cutting.md`
+  - Explains video trim previews, cutting jobs, and gapless partition storage (`IVideoShotService`).
 - **Interactive Feature Guides & Storyboards**: `/Users/kari/cove-dev/upstream/cove/docs/feature-guides/`
   - Contains over 40 structured JSON definitions detailing Cove user flows, UI layouts, keyboard shortcuts, filters, and custom fields.
 

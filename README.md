@@ -20,11 +20,17 @@ graph TD
 
     subgraph Plugins[Specialist Plugins & Tools]
         UI[Native React 19 UI: Pages, Tabs, Slots, Settings]
-        API[ASP.NET Minimal APIs: /api/ext/...]
+        Dash[Personal Dashboard Widgets: Flow vs Canvas]
+        XR[WebXR VR Experiences: @cove/runtime/webxr]
+        Keys[Keyboard Actions & Shortcut Presets]
+        Guides[Interactive Feature Guides]
+        API[ASP.NET Minimal APIs: /api/ext/... + RequireCovePermission]
         State[Stateful Storage: IExtensionStore]
         Jobs[Background Tasks: IJobExtension]
+        Scan[Media Library Scan Participants: IScanParticipant]
         Events[Lifecycle Hooks: IEventExtension]
         Data[Database Tables: EF Core Migrations]
+        Maint[Video Maintenance & Shot Segmentation]
         Filters[Custom List Filters & Sorts]
     end
 
@@ -33,12 +39,14 @@ graph TD
         DDivert[Wrapper / Divert Diversion]
         DGallery[Multi-Image Gallery ZIP]
         DExternal[yt-dlp / ffmpeg External Binaries]
+        DAuth[Saved Site Logins & Quality Negotiation]
     end
 
     subgraph Scrapers[Metadata Scrapers]
         CSharpScraper[Compiled C# IScraperProvider]
         YamlScraper[Native YAML Scraper Pack]
         JSONLD[JSON-LD / OpenGraph / XPath / API Extraction]
+        Dates[ISO Production Dates & Audio/Doc Metadata]
     end
 ```
 
@@ -54,20 +62,38 @@ Autonomous agent capable of end-to-end execution across all Cove extension types
 Location: `skills/cove-plugin-authoring/`
 Specialist authoring skill for plugins that are **not downloaders or scrapers**:
 - **Native UI Creation**: React 19 ESM bundles, `@cove/runtime/*` virtual module map, host component barrel (`@cove/runtime/components`), authenticated client (`@cove/runtime/api`), and Tailwind CSS v4 styling with host theme variables.
-- **Backend API Surface**: Minimal APIs (`IApiExtension`), dependency injection, stateful key-value storage (`IExtensionStore`), database entities & SQL migrations (`IDataExtension`), background jobs (`IJobExtension`), lifecycle events (`IEventExtension`), and action buttons (`IActionExtension`).
-- **Official Cove Dev Docs Recall**: Systematic index mapping official developer guides (`overview.mdx`, `create-extension.mdx`, `permissions.mdx`, `packaging.mdx`, `api/overview.mdx`, `local-development.mdx`) and upstream reference codebases (`cove-extensions-ui`, `AI.Extensions`, `recommendations`).
+- **Personal Dashboard Widgets**: User-customizable dashboard widgets (`UIDashboardWidgetContribution`) rendering in Flow or Canvas layout contexts via `DashboardWidgetProps`.
+- **WebXR VR Experiences**: Immersive headset/VR playback and session orchestration via `@cove/runtime/webxr`.
+- **Keyboard Actions & Presets**: Configurable global key bindings via `AddKeyboardAction` and `AddKeyboardShortcutPreset`.
+- **Interactive Feature Guides**: Built-in step-by-step extension walkthroughs via `featureGuides` manifests.
+- **Backend API Surface**: Minimal APIs (`IApiExtension`) with authorization conventions (`RequireCovePermission`, `RequireCoveEntityAccess`, `AllowWithoutCovePermission`), tracked DI scopes (`IExtensionServiceScopeFactory`), stateful key-value storage (`IExtensionStore`), database entities & SQL migrations (`IDataExtension`), background jobs (`IJobExtension`), library scan participants (`IScanParticipant`), lifecycle events (`IEventExtension`), and action buttons (`IActionExtension`).
+- **Official Cove Dev Docs Recall**: Systematic index mapping official developer guides (`overview.mdx`, `create-extension.mdx`, `extension-points.mdx`, `ui-extension-points.mdx`, `frontend-runtime.mdx`, `permissions.mdx`, `packaging.mdx`, `events.mdx`, `api/overview.mdx`, `local-development.mdx`) and upstream reference codebases (`cove-extensions-ui`, `AI.Extensions`, `recommendations`).
 
 ### 3. `cove-downloader-authoring` (Skill)
 Location: `skills/cove-downloader-authoring/`
 Authoring and testing compiled Cove downloaders (`IDownloaderProvider`):
 - Direct video/image/audio streams, external diversion (`Divert = true`), multi-image gallery ZIPs, and external binary adaptors (`yt-dlp`/`ffmpeg`).
-- Offline fixture testing with `FakeDownloaderHost` and progress reporting (`0.0` to `100.0`).
+- Offline fixture testing with `FakeDownloaderHost`, progress reporting (`0.0` to `100.0`), quality negotiation (`DownloaderQualityOption`), and authenticated site logins (`IDownloaderSiteLoginProvider`).
 
 ### 4. `cove-scraper-authoring` (Skill)
 Location: `skills/cove-scraper-authoring/`
 Authoring compiled C# scrapers (`IScraperProvider`) and native YAML scraper packs (`kind: scraper-pack`):
 - Structured metadata extraction from `application/ld+json`, OpenGraph tags, embedded JSON states, and XPath/DOM.
-- Automatic ISO date normalization (`yyyy-MM-dd`), code extraction, and studio attribution.
+- Video, gallery, audio, and text document entity models with ISO production dates (`ProductionDate`) and host network permissions (`AllowNetworkHosts`).
+
+---
+
+## Upstream Cove API Sync & Verification
+
+This suite includes automated tooling and comprehensive documentation to inspect upstream Cove releases, maintain API surface parity, and check contract baselines:
+
+- **Automated Verification Tool**: [`scripts/sync-upstream-cove.py`](scripts/sync-upstream-cove.py)
+  ```bash
+  # Check upstream releases, tags, ABI baselines, and local reference parity
+  python3 scripts/sync-upstream-cove.py
+  ```
+- **Sync & Maintenance Guide**: [`docs/upstream-sync-guide.md`](docs/upstream-sync-guide.md)
+  A complete 5-phase procedure detailing Cove's versioning model (semver, ABI baseline with ApiCompat, `minCoveVersion`, unversioned `/api/` routes, frontend runtime `v1`), inspection techniques, and how to verify extension compatibility.
 
 ---
 
