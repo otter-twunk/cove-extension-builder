@@ -10,7 +10,7 @@ Understanding Cove's versioning model is essential for writing compatible extens
 
 ```mermaid
 graph TD
-    Host[Running Cove Host e.g. v1.7.0] -->|Enforces minCoveVersion| Package[Extension Package: extension.json]
+    Host[Running Cove Host e.g. v1.8.0] -->|Enforces minCoveVersion| Package[Extension Package: extension.json]
     Host -->|Loads in isolated ALC| ExtALC[Extension AssemblyLoadContext]
     Host -->|Supplies compile-only closure| SharedABI[Extension ABI: Cove.Core / Cove.Plugins / Cove.Sdk]
     SharedABI -->|ApiCompat checked against| Baseline[ABI Baseline: v1.4.1]
@@ -18,8 +18,8 @@ graph TD
 ```
 
 ### Core Release Lifecycle & Semantic Versioning
-- **Release Versioning**: Follows Semantic Versioning (`MAJOR.MINOR.PATCH`). Stable releases are tagged on GitHub (e.g. `v1.6.0`, `v1.6.1`, `v1.7.0`).
-- **Development Builds**: Prereleases use suffixes such as `1.7.1-dev.42` or `1.6.1-rc.1`.
+- **Release Versioning**: Follows Semantic Versioning (`MAJOR.MINOR.PATCH`). Stable releases are tagged on GitHub (e.g. `v1.6.0`, `v1.7.0`, `v1.8.0`).
+- **Development Builds**: Prereleases use suffixes such as `1.8.1-dev.42` or `1.8.0-rc.1`.
 - **`minCoveVersion`**: Declared in `extension.json`.
   - Compared against the **running Cove version** at install time.
   - The native ZIP and URL installers (`POST /api/extensions/install-zip`, `POST /api/extensions/install-url`) and extension registry reject packages when `minCoveVersion` exceeds the running host.

@@ -2,11 +2,11 @@
 
 [![Antigravity Plugin](https://img.shields.io/badge/Antigravity-Agent%20%26%20Plugin-4F46E5.svg)](https://antigravity.google)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Cove SDK](https://img.shields.io/badge/Cove%20SDK-v1.7.0-emerald.svg)](https://yourcove.org)
+[![Cove SDK](https://img.shields.io/badge/Cove%20SDK-v1.8.0-emerald.svg)](https://yourcove.org)
 
 Autonomous agent and specialized skill suite for designing, scaffolding, implementing, testing, and packaging extensions and plugins for [Cove](https://github.com/yourcove/cove).
 
-Built against upstream `yourcove/cove` (`Cove.Sdk`, `Cove.Plugins`, and `Cove.Core` `v1.7.0`) contracts with full support for native desktop host environments (such as the native Windows desktop application).
+Built against upstream `yourcove/cove` (`Cove.Sdk`, `Cove.Plugins`, and `Cove.Core` `v1.8.0`) contracts with full support for native desktop host environments (such as the native Windows desktop application).
 
 ---
 

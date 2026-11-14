@@ -50,7 +50,7 @@ Before building, consult the repository's specialized skills:
 
 ### Official Cove Dev Docs & Upstream Checkouts (Read-Only Reference)
 - Official Documentation Site: `/Users/kari/cove-dev/upstream/docs-site/src/content/docs/docs/developer/`
-- Core Cove Host & Contracts: `/Users/kari/cove-dev/upstream/cove/src/` (`Cove.Sdk`, `Cove.Plugins`, `Cove.Core` `v1.7.0`)
+- Core Cove Host & Contracts: `/Users/kari/cove-dev/upstream/cove/src/` (`Cove.Sdk`, `Cove.Plugins`, `Cove.Core` `v1.8.0`)
 - Upstream UI Extensions: `/Users/kari/cove-dev/upstream/cove-extensions-ui/extensions/` (`CustomHomePage`, `SceneAnalytics`, `Audios`)
 - Upstream AI & Job Extensions: `/Users/kari/cove-dev/upstream/AI.Extensions/extensions/` (`AI.Core`, `AI.Visual`, `AI.Faces`, `AI.Audio`)
 - Upstream Recommendations: `/Users/kari/cove-dev/upstream/recommendations/extensions/` (`Recommendations.Core`, `Recommendations.Tastes`)

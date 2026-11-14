@@ -123,6 +123,13 @@ The global MVC permission filter does not wrap minimal APIs. Use conventions fro
 - `.AllowWithoutCovePermission()`: Explicitly permits any authenticated Cove session without checking role permissions.
 - `.AllowCoveAnonymous()`: Explicitly permits anonymous calls (e.g. initial external auth redirects).
 
+### OpenAPI Discovery & Swagger UI (`/openapi/v1.json`, `/swagger`)
+Starting in Cove 1.8.0, every Cove instance (including production builds) automatically serves:
+- The generated OpenAPI document at `/openapi/v1.json` (behind authentication or with an API token header: `Authorization: Bearer <TOKEN>`).
+- Interactive Swagger UI at `/swagger` on the same origin.
+- **Extension Grouping**: Cove lists each extension's Minimal API routes in their own section named `Extension: <Extension Name>` and marks each operation with an `x-cove-extension` property holding the extension ID. Tags set on extension routes are replaced by the host to preserve separation from core sections.
+- Add standard ASP.NET Core endpoint metadata (`.WithSummary(...)`, `.WithDescription(...)`, `.Produces<T>(...)`) to generate a complete API schema for client generators.
+
 ---
 
 ## 3. Contributing Role Permissions & Policies (`IPermissionContributor`)
@@ -446,8 +453,32 @@ Extensions can inject standard host interfaces into DI:
 | `IVideoShotService` | Video shot sets, cuts, frames, and edit versions |
 | `ISegmentSpanCacheInvalidator` | Invalidation of raw and projected segment caches |
 | `IVideoFileMaintenanceService` | Primary file reassignment and duplicate deletion |
-| `IUserEngagementService` | Per-user ratings, favorites, watch history, play dates (`UserId`) |
+| `IUserEngagementService` | Per-user ratings, favorites, watch history, play dates (`UserId`). In 1.8.0+, managing personal engagement requires only read access to the target entity, not write permission. |
 | `ICustomFieldRepository` | Custom field values and definitions |
 | `IBlobService` | Binary asset blobs (`GetBlobAsync`, seekable streams) |
 | `IDownloaderService` | URL matching and intake downloads |
 | `IJobService` | Host job queueing and inspection |
+
+---
+
+## 13. Host Image Processing Architecture (`NetVips` vs `ImageSharp`)
+
+In Cove 1.8.0+, the host media pipeline migrated from `SixLabors.ImageSharp` to **`NetVips`** (`libvips`) for high-throughput image decoding, thumbnail generation, and sprite sheet caching:
+- **Zero Host Leak Invariant**: Extensions must **not** assume `SixLabors.ImageSharp.dll` is present in the host's runtime assembly load context.
+- **Extension Private Image Dependencies**: If an extension performs custom image transforms, it must either bundle its own isolated copy of its preferred image library or interop with host image endpoints.
+- **Pooled Buffer I/O**: Host image generation now operates directly on native memory buffers, avoiding intermediate managed copies.
+
+---
+
+## 14. In-App User Guides & Feature Guides (`UIFeatureGuide`)
+
+Cove 1.8.0 adds formal support for extensions shipping rich User Guide articles written in Cove's shared feature-guide format:
+- **Manifest File Declaration**: Declared in `extension.json` via `"featureGuides": ["docs/guides/overview.json"]`.
+- **Host Loading Rule**: The host populates `UIManifest.FeatureGuides` solely from `extension.json`. Guides returned dynamically from `IUIExtension.GetUIManifest()` are ignored.
+- **Schema & Limits**:
+  - Validated against `docs/feature-guides/schema.json` with `schemaVersion: 1`.
+  - Maximum 32 guide files per extension package.
+  - Maximum 256 KiB file size, UTF-8 encoded.
+  - Sections require kebab-case `id`, `title`, and `order`.
+  - Relative images (e.g. `../images/diagram.webp`) are served by the extension asset endpoint.
+

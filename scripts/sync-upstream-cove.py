@@ -258,6 +258,11 @@ def run_sync(client: GitHubClient | None, local_path: Path | None, do_cache: boo
             "IScanParticipant",
             "IMiddlewareExtension",
             "IBackgroundExtension",
+            "x-cove-extension",
+            "/openapi/v1.json",
+            "NetVips",
+            "featureGuides",
+            "IUserEngagementService",
         ]),
         ("cove-native-ui.md", native_ui_ref, [
             "@cove/runtime/webxr",
@@ -272,6 +277,8 @@ def run_sync(client: GitHubClient | None, local_path: Path | None, do_cache: boo
             "EntityMedia",
             "DetailListPagination",
             "useDocumentTitle",
+            "featureGuides",
+            "schemaVersion",
         ]),
         ("cove-dev-docs-index.md", dev_docs_ref, [
             "extension-points.mdx",

@@ -35,7 +35,7 @@ Consult the specialized references in this skill before and during authoring:
 
 ### Local Official Documentation & Upstream Sources
 - Official documentation site sources: `/Users/kari/cove-dev/upstream/docs-site/src/content/docs/docs/developer/`
-- Cove host source contracts: `/Users/kari/cove-dev/upstream/cove/src/` (`Cove.Sdk`, `Cove.Plugins`, `Cove.Core` `v1.7.0`+)
+- Cove host source contracts: `/Users/kari/cove-dev/upstream/cove/src/` (`Cove.Sdk`, `Cove.Plugins`, `Cove.Core` `v1.8.0`+)
 - Real-world UI extensions: `/Users/kari/cove-dev/upstream/cove-extensions-ui/extensions/`
 - Real-world background job & ML extensions: `/Users/kari/cove-dev/upstream/AI.Extensions/extensions/`
 - Real-world recommendation & filter extensions: `/Users/kari/cove-dev/upstream/recommendations/extensions/`
@@ -51,6 +51,7 @@ Determine which host capabilities the extension needs:
 | Requirement | Required Interfaces / Base Classes | Reference |
 |---|---|---|
 | Native UI page, tab, slot, or settings | `IUIExtension`, `CoveExtensionBase`, `UIManifestBuilder` | [references/cove-native-ui.md](references/cove-native-ui.md) |
+| In-app User Guide articles | `extension.json` `featureGuides` array, schemaVersion 1 | [references/cove-native-ui.md#9](references/cove-native-ui.md) |
 | Personal dashboard widget | `IUIExtension`, `AddDashboardWidget`, `DashboardWidgetProps` | [references/cove-native-ui.md#4](references/cove-native-ui.md) |
 | WebXR immersive VR playback | `@cove/runtime/webxr` (`startImmersiveVideo`, `getImmersiveVrSupport`) | [references/cove-native-ui.md#6](references/cove-native-ui.md) |
 | Custom backend HTTP endpoints | `IApiExtension` (`MapEndpoints`, `RequireCovePermission`) | [references/cove-api-surface.md#2](references/cove-api-surface.md) |

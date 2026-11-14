@@ -1,8 +1,8 @@
 {
   "name": "cove-extension-builder",
   "displayName": "Cove Extension & Plugin Builder",
-  "version": "1.2.0",
-  "description": "Autonomous agent and skill suite for creating, testing, packaging, and syncing Cove plugins, tools, native React 19 UI, personal dashboard widgets, WebXR VR experiences, downloaders (IDownloaderProvider), and metadata scrapers (IScraperProvider / YAML scraper-packs) in kari-downloads.",
+  "version": "1.3.0",
+  "description": "Autonomous agent and skill suite for creating, testing, packaging, and syncing Cove plugins, tools, native React 19 UI, personal dashboard widgets, feature guides, WebXR VR experiences, downloaders (IDownloaderProvider), and metadata scrapers (IScraperProvider / YAML scraper-packs) for Cove 1.8.0+.",
   "suggestedPrompts": [
     "Create a Cove native UI plugin with custom pages, personal dashboard widgets, and API endpoints",
     "Build a background job and automation plugin for Cove with entity lifecycle events and tracked scopes",

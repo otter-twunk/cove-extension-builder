@@ -80,7 +80,7 @@ public sealed class MyExtension : CoveExtensionBase, IUIExtension
     public override UIManifest GetUIManifest()
     {
         return ManifestBuilder()
-            // 1. Navigation Page (icon: "puzzle" or "music")
+            // 1. Navigation Page (visible in nav by default in Cove 1.8.0+)
             .AddPage(
                 route: "my-tool",
                 label: "My Tool",
@@ -91,11 +91,13 @@ public sealed class MyExtension : CoveExtensionBase, IUIExtension
             )
 
             // 2. Entity Detail Tab (pageType: "video", "performer", "studio", "tag", "gallery", "group")
+            // In Cove 1.8.0+, declared icons are officially rendered in detail tabs!
             .AddTab(
                 key: "analytics-tab",
                 label: "Analytics",
                 pageType: "video",
                 componentName: "MyAnalyticsTab",
+                icon: "chart-line",
                 order: 100
             )
 
@@ -316,8 +318,29 @@ Import standard host primitives from `@cove/runtime/components`:
 
 ## 9. Feature Guides (`featureGuides: [...]`)
 
-Extensions can contribute rich, in-app User Guide articles using Cove's shared JSON feature-guide format:
-- Declare in `extension.json`: `"featureGuides": ["docs/guides/overview.json"]`.
-- Format matches `docs/feature-guides/schema.json` with sections, steps, tables, notes, and recipes.
-- Supports packaged `.webp` images and cross-links.
-- Nested under other topics via `parentTopicId`.
+In Cove 1.8.0+, extensions can contribute rich, in-app User Guide articles using Cove's shared JSON feature-guide format:
+- **Declaration in `extension.json`**:
+  ```json
+  {
+    "featureGuides": [
+      "docs/guides/overview.json",
+      "docs/guides/workflows.json"
+    ]
+  }
+  ```
+- **Host Loading Rule**: The host populates `UIManifest.FeatureGuides` strictly from `extension.json`. Feature guides returned dynamically from `IUIExtension.GetUIManifest()` are ignored.
+- **Packaging Limits & Rules**:
+  - Maximum **32** guide files per package (excess files are logged as warnings and ignored).
+  - Maximum **256 KiB** file size, nested at most 32 levels deep, encoded in UTF-8.
+  - Must conform to `docs/feature-guides/schema.json` with `schemaVersion: 1`.
+  - Required top-level fields: kebab-case `id`, `title`, `description`, non-negative `order`.
+  - Prefix guide IDs (e.g. `my-tool-overview`) to prevent colliding with built-in topics (`search`, `metadata`, `tagging` are reserved).
+- **Structure & Rich Blocks**:
+  - Each guide is an article composed of sections containing paragraphs, steps, ordered/unordered lists, callout notes, tables, code blocks, recipes, and links.
+- **Images & Links**:
+  - Relative images (e.g. `../images/settings.webp`) resolve relative to the guide file directory and are served by the host's extension asset endpoint (requires `entryDll`).
+  - Cross-topic links use `topicId: "other-topic-id"`.
+  - External links use `href: "https://..."` or `href: "/docs/..."`. Cove app routes use `appHref: "/settings/extensions"`.
+- **Nesting**:
+  - Set `parentTopicId` to nest a guide under another guide or a built-in topic (up to two levels deep).
+
