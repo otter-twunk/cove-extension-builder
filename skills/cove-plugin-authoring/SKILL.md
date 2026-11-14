@@ -166,3 +166,52 @@ This verifies:
 2. `build-extension-ui.mjs`: Bundles TypeScript React UI into `dist/bundle.js` + `dist/bundle.css`.
 3. `dotnet test`: Runs offline fixture tests in `tests/KariDownloads.Tests/`.
 4. `package-extension.mjs`: Publishes Release binaries, verifies zero leaked host DLLs, and builds `artifacts/packages/<id>-<version>.zip`.
+
+---
+
+## 3. Distribution, Rolling Releases & Update Feeds
+
+### Host Installation Semantics
+Cove installs extensions via `POST /api/extensions/install-from-url` with `{ "url": "https://...", "trustUnverified": true }`:
+- Cove downloads and extracts the archive in memory, expecting exactly **one** `extension.json` file at the root.
+- The host validates checksums, manifest fields, dependencies, and permissions before placing the package in Cove's extensions directory.
+- **Important**: Cove does *not* persist the origin download URL inside `extension.json` or maintain direct remote update tracking for installed extensions.
+
+### Static Rolling Releases & `latest-manifest.json` Feed
+To enable automatic, one-click in-app updates (e.g. via `ExtensionUpdater` or external update scripts) without modifying Cove's global `ExtensionRegistryBaseUrl`, repositories publish both tagged version releases and a rolling `latest` release on every tag push (`*/v*`):
+
+1. **Per-Extension Static Rolling ZIP URL**:
+   ```
+   https://github.com/<owner>/<repo>/releases/download/latest/<extensionId>-latest.zip
+   ```
+   Always points to the freshest build of that extension. Users or updater tools can install or update directly from this static link.
+
+2. **Repo-Wide Static Manifest Feed URL**:
+   ```
+   https://github.com/<owner>/<repo>/releases/download/latest/latest-manifest.json
+   ```
+   A static JSON feed cataloging all extensions published by the repository:
+   ```json
+   {
+     "schemaVersion": 1,
+     "updatedAt": "2026-11-14T22:00:00.000Z",
+     "extensions": {
+       "my-extension-id": {
+         "id": "my-extension-id",
+         "name": "My Extension",
+         "version": "1.0.1",
+         "description": "Extension description",
+         "minCoveVersion": "1.8.0",
+         "downloadUrl": "https://github.com/<owner>/<repo>/releases/download/latest/my-extension-id-latest.zip",
+         "versionedUrl": "https://github.com/<owner>/<repo>/releases/download/my-extension/v1.0.1/my-extension-id-1.0.1.zip",
+         "updatedAt": "2026-11-14T22:00:00.000Z"
+       }
+     }
+   }
+   ```
+
+3. **Release Automation (`.github/workflows/build.yml`)**:
+   - Creates the versioned GitHub Release for `{extensionId}-{version}.zip`.
+   - Ensures rolling `latest` release exists with `--latest=false` (never overriding the repository's default latest release).
+   - Fetches or initializes `latest-manifest.json`.
+   - Extracts `extension.json` from each built `.zip`, upserts `manifest.extensions[ext.id]`, copies `<id>-<version>.zip` to `<id>-latest.zip`, and uploads both to `latest` with `gh release upload latest ... --clobber`.

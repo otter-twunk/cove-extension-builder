@@ -44,9 +44,11 @@ Before building, consult the repository's specialized skills:
   - `references/cove-dev-docs-index.md`: Instant recall and fast lookup of all official Cove dev documentation.
 - **`cove-downloader-authoring`** (`.agents/plugins/cove-extension-builder/skills/cove-downloader-authoring/SKILL.md` & `references/downloader-contracts.md`): Media streaming, gallery zips, quality negotiation (`DownloaderQualityOption`), and site login persistence.
 - **`cove-scraper-authoring`** (`.agents/plugins/cove-extension-builder/skills/cove-scraper-authoring/SKILL.md`, `references/scraper-contracts.md`, & `references/yaml-scraper-dialect.md`): Compiled and native YAML scrapers with ISO production dates and host network permissions.
-- **Upstream Sync Tooling**:
+- **Upstream Sync & Release Tooling**:
   - `scripts/sync-upstream-cove.py`: Automated tool to inspect `yourcove/cove` releases, tags, ABI baselines, and surface parity across reference files.
   - `docs/upstream-sync-guide.md`: Comprehensive guide to Cove versioning architecture, ABI compatibility gating, and upstream update procedures.
+  - `docs/release-distribution-guide.md`: Architectural specification and guide for static rolling-release ZIPs (`<id>-latest.zip`) and repo-wide manifest feeds (`latest-manifest.json`).
+  - `templates/github-workflows/build.yml`: Canonical GitHub Actions CI/CD matrix build and multi-extension release workflow.
 
 ### Official Cove Dev Docs & Upstream Checkouts (Read-Only Reference)
 - Official Documentation Site: `/Users/kari/cove-dev/upstream/docs-site/src/content/docs/docs/developer/`
@@ -111,4 +113,11 @@ Before building, consult the repository's specialized skills:
 - **Patch Version Bump on Every Release**: Every modified extension must receive a patch bump (`0.0.1`, e.g. `0.1.0` -> `0.1.1`) in `extension.json` when changes are made.
 - **Zero Host Leaks**: Never include host-provided assemblies (`Cove.Sdk.dll`, `Cove.Core.dll`, `Cove.Plugins.dll`, EF Core, Npgsql) in individual `.csproj` references or packaged `.zip` archives.
 - **Clean UI Bundling**: All extension React UI code must compile cleanly via `scripts/build-extension-ui.mjs` into `dist/bundle.js` with host externals aliased.
+- **Static Rolling Releases & `latest-manifest.json` Feed**:
+  - Cove's `POST /api/extensions/install-from-url` expects one `extension.json` per ZIP archive and does not track direct URLs for future updates or modify source repositories.
+  - Multi-extension repositories must publish both versioned releases (`{extensionId}-{version}.zip`) and rolling `latest` release assets (`--latest=false`):
+    - **Per-extension static ZIP URL**: `https://github.com/<owner>/<repo>/releases/download/latest/<extensionId>-latest.zip`
+    - **Repo-wide static manifest feed URL**: `https://github.com/<owner>/<repo>/releases/download/latest/latest-manifest.json`
+  - This architecture provides permanent, predictable URLs for one-click in-app updaters (such as `ExtensionUpdater`) and batch installers without requiring replacement of Cove's primary `ExtensionRegistryBaseUrl`.
+  - The GitHub Actions release step ensures `latest` exists (`--latest=false`), downloads or initializes `latest-manifest.json`, extracts `extension.json` from each built `*.zip` to upsert manifest records (`id`, `name`, `version`, `description`, `minCoveVersion`, `downloadUrl`, `versionedUrl`, `updatedAt`), copies to `<id>-latest.zip`, and uploads with `gh release upload latest ... --clobber`.
 - **Always Verify**: Run `npm run verify` before declaring completion.

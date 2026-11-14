@@ -90,3 +90,11 @@ Confirm that:
 1. `node scripts/validate-extension-repo.mjs` passes.
 2. `dotnet test MultiExtensionTemplate.slnx -c Release` passes all xUnit tests.
 3. `node scripts/package-extension.mjs` produces `artifacts/packages/<id>-<version>.zip` with `extension.json` at the root and zero leaked host assemblies.
+
+### Release & Rolling Distribution
+When a tagged release is pushed (`*/v*`), `.github/workflows/build.yml` builds and packages the extension, publishing:
+- Versioned release asset: `https://github.com/<owner>/<repo>/releases/download/<tagPrefix>v<version>/<id>-<version>.zip`
+- Rolling static release asset: `https://github.com/<owner>/<repo>/releases/download/latest/<id>-latest.zip` (in a rolling `latest` release with `--latest=false`)
+- Repo manifest feed update: `https://github.com/<owner>/<repo>/releases/download/latest/latest-manifest.json`
+
+Cove's `POST /api/extensions/install-from-url` accepts single-extension ZIP archives without saving remote URLs. Using rolling `latest` URLs and `latest-manifest.json` gives users and in-app updaters permanent, stable endpoints for automated installations and upgrades.

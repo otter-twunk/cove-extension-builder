@@ -1,13 +1,14 @@
 {
   "name": "cove-extension-builder",
   "displayName": "Cove Extension & Plugin Builder",
-  "version": "1.3.0",
-  "description": "Autonomous agent and skill suite for creating, testing, packaging, and syncing Cove plugins, tools, native React 19 UI, personal dashboard widgets, feature guides, WebXR VR experiences, downloaders (IDownloaderProvider), and metadata scrapers (IScraperProvider / YAML scraper-packs) for Cove 1.8.0+.",
+  "version": "1.4.0",
+  "description": "Autonomous agent and skill suite for creating, testing, packaging, and syncing Cove plugins, tools, native React 19 UI, personal dashboard widgets, feature guides, WebXR VR experiences, downloaders (IDownloaderProvider), metadata scrapers (IScraperProvider / YAML scraper-packs), and static rolling releases with repo-wide manifest feeds for Cove 1.8.0+.",
   "suggestedPrompts": [
     "Create a Cove native UI plugin with custom pages, personal dashboard widgets, and API endpoints",
     "Build a background job and automation plugin for Cove with entity lifecycle events and tracked scopes",
     "Create a Cove video downloader with authenticated site login and quality negotiation",
     "Scaffold and test a new Cove plugin using official Cove dev docs",
-    "Sync and verify Cove extension builder reference contracts with latest upstream Cove releases"
+    "Sync and verify Cove extension builder reference contracts with latest upstream Cove releases",
+    "Configure static rolling-release URLs and latest-manifest.json feed for one-click extension updates"
   ]
 }

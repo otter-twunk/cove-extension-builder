@@ -83,6 +83,27 @@ Authoring compiled C# scrapers (`IScraperProvider`) and native YAML scraper pack
 
 ---
 
+## Static Rolling Releases & `latest-manifest.json` Feed
+
+Cove installs extensions via `POST /api/extensions/install-from-url`, expecting a single `extension.json` per ZIP archive without tracking source URLs for updates.
+
+To enable one-click updates and automated batch maintenance (e.g. via `ExtensionUpdater`) without replacing Cove's official registry, repositories configured with this suite publish **Static Rolling-Release URLs** and a **repo-wide `latest-manifest.json` feed** alongside normal versioned GitHub Releases:
+
+- **Per-Extension Rolling Static ZIP**:
+  ```
+  https://github.com/<owner>/<repo>/releases/download/latest/<extensionId>-latest.zip
+  ```
+- **Repo-Wide Static Manifest Feed**:
+  ```
+  https://github.com/<owner>/<repo>/releases/download/latest/latest-manifest.json
+  ```
+- **Release Documentation**: [`docs/release-distribution-guide.md`](docs/release-distribution-guide.md)
+- **Workflow Template**: [`templates/github-workflows/build.yml`](templates/github-workflows/build.yml)
+
+The GitHub Actions release job ensures `latest` exists (`--latest=false`), downloads or initializes `latest-manifest.json`, extracts `extension.json` from each built package to update manifest records (`id`, `name`, `version`, `description`, `minCoveVersion`, `downloadUrl`, `versionedUrl`, `updatedAt`), copies packages to `<id>-latest.zip`, and uploads all assets to the `latest` release with `--clobber`.
+
+---
+
 ## Upstream Cove API Sync & Verification
 
 This suite includes automated tooling and comprehensive documentation to inspect upstream Cove releases, maintain API surface parity, and check contract baselines:

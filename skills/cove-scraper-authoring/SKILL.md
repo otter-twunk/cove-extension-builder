@@ -96,3 +96,11 @@ npm run verify
 ```
 
 Confirm that `validate-extension-repo.mjs`, `dotnet test`, and `package-extension.mjs` all succeed with zero errors.
+
+### Release & Rolling Distribution
+When a tagged release is pushed (`*/v*`), `.github/workflows/build.yml` builds and packages the extension, publishing:
+- Versioned release asset: `https://github.com/<owner>/<repo>/releases/download/<tagPrefix>v<version>/<id>-<version>.zip`
+- Rolling static release asset: `https://github.com/<owner>/<repo>/releases/download/latest/<id>-latest.zip` (in a rolling `latest` release with `--latest=false`)
+- Repo manifest feed update: `https://github.com/<owner>/<repo>/releases/download/latest/latest-manifest.json`
+
+Because Cove's `POST /api/extensions/install-from-url` installs single-extension ZIPs without storing origin URLs for updates, rolling `latest` URLs and `latest-manifest.json` provide permanent static URLs for updaters without replacing `ExtensionRegistryBaseUrl`.
